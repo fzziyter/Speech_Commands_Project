@@ -13,6 +13,7 @@ def extract_mfcc(file_path, n_mfcc=40, max_len=44):
     """
     audio, sr = librosa.load(file_path, sr=16000)  # resampling à 16kHz
     mfcc = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=n_mfcc)
+    #mfcc = (mfcc - np.mean(mfcc)) / (np.std(mfcc)+ 1e-6)
     
     # Padding ou truncation pour avoir la même taille
     if mfcc.shape[1] < max_len:
