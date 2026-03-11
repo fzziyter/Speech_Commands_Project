@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Recognition AI Demo</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-microphone-lines"></i>
+                </div>
+                <h1>Voice Recognition AI</h1>
+            </div>
+            <p class="tagline">Deep Learning Speech Command Recognition Demo</p>
+        </header>
+
+        <!-- Main Card -->
+        <main class="main-card">
+            <!-- Waveform Visualization -->
+            <div class="waveform-section">
+                <canvas id="waveform"></canvas>
+                <div class="waveform-overlay" id="waveformOverlay">
+                    <i class="fas fa-wave-square"></i>
+                    <span>Ready to listen</span>
+                </div>
+            </div>
+
+            <!-- Recording Indicator -->
+            <div class="recording-indicator" id="recordingIndicator">
+                <div class="pulse-ring"></div>
+                <div class="recording-dot"></div>
+                <span>Recording...</span>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <div class="upload-tabs">
+                    <button class="tab-btn active" data-tab="upload">
+                        <i class="fas fa-upload"></i>
+                        Upload Audio
+                    </button>
+                    <button class="tab-btn" data-tab="record">
+                        <i class="fas fa-microphone"></i>
+                        Record Voice
+                    </button>
+                </div>
+
+                <!-- Upload Tab -->
+                <div class="tab-content active" id="uploadTab">
+                    <div class="drop-zone" id="dropZone">
+                        <div class="drop-zone-content">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <h3>Drag & Drop Audio</h3>
+                            <p>or click to browse files</p>
+                            <div class="supported-formats">
+                                <span class="format-badge">.wav</span>
+                                <span class="format-badge">.mp3</span>
+                                <span class="format-badge">.ogg</span>
+                                <span class="format-badge">.m4a</span>
+                            </div>
+                        </div>
+                        <input type="file" id="audioInput" accept=".wav,.mp3,.ogg,.m4a" hidden>
+                    </div>
+                </div>
+
+                <!-- Record Tab -->
+                <div class="tab-content" id="recordTab">
+                    <div class="record-controls">
+                        <button class="record-btn" id="recordBtn">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <p class="record-hint">Click to start recording</p>
+                        <div class="recording-timer" id="recordingTimer">00:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audio Player -->
+            <div class="audio-player-section" id="audioPlayerSection">
+                <div class="audio-player-card">
+                    <div class="audio-info">
+                        <i class="fas fa-music"></i>
+                        <span class="file-name" id="fileName">audio_file.wav</span>
+                    </div>
+                    <div class="audio-controls">
+                        <button class="audio-btn" id="playPauseBtn">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <div class="progress-container">
+                            <input type="range" class="progress-bar" id="progressBar" value="0" min="0" max="100">
+                            <div class="time-display">
+                                <span id="currentTime">0:00</span>
+                                <span id="duration">0:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="submit-section" id="submitSection">
+                <button class="submit-btn" id="submitBtn">
+                    <i class="fas fa-brain"></i>
+                    <span>Analyze Audio</span>
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-section" id="loadingSection">
+                <div class="loading-content">
+                    <div class="loading-spinner">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                    </div>
+                    <h3>Processing Audio...</h3>
+                    <p>Deep learning model is analyzing your speech</p>
+                </div>
+            </div>
+
+            <!-- Prediction Result -->
+            <div class="prediction-section" id="predictionSection">
+                <div class="prediction-card">
+                    <div class="prediction-header">
+                        <div class="prediction-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h2>Prediction Result</h2>
+                    </div>
+                    <div class="prediction-content">
+                        <div class="command-label">Recognized Command:</div>
+                        <div class="command-text" id="predictedCommand">
+                            <span class="placeholder">Waiting for input...</span>
+                        </div>
+                        <div class="confidence-bar-container">
+                            <span class="confidence-label">Confidence:</span>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidenceFill"></div>
+                            </div>
+                            <span class="confidence-value" id="confidenceValue">0%</span>
+                        </div>
+                    </div>
+                    <div class="prediction-footer">
+                        <div class="other-predictions" id="otherPredictions">
+                            <span class="other-label">Other possibilities:</span>
+                            <div class="other-tags" id="otherTags"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by Deep Learning • TensorFlow/PyTorch</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
