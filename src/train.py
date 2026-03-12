@@ -16,6 +16,10 @@ y_test = np.load("data/processed/y_test.npy")
 mean = X_train.mean()
 std = X_train.std()
 
+# Sauvegarder
+np.save("mean.npy", mean)
+np.save("std.npy", std)
+
 X_train = (X_train - mean) / std
 X_val = (X_val - mean) / std
 

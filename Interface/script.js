@@ -455,46 +455,34 @@ function formatTime(seconds) {
 // ============================================
 async function submitAudio() {
     if (!audioFile) {
-        alert('Please upload or record an audio file first.');
+        alert('Please upload or record audio first');
         return;
     }
-    
-    // Show loading
+
     elements.submitSection.classList.remove('active');
     elements.loadingSection.classList.add('active');
-    
-    // Stop audio if playing
-    if (audioElement && isPlaying) {
-        audioElement.pause();
-        isPlaying = false;
-        elements.playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-    }
-    
+
+    const formData = new FormData();
+    // L'identifiant "audio" doit correspondre à request.files["audio"] côté Python
+    formData.append("audio", audioFile, "recording.wav"); 
+
     try {
-        // Create FormData
-        const formData = new FormData();
-        formData.append('audio', audioFile);
-        
-        // Send to API (simulated for demo)
-        // In production, replace with actual API endpoint
-        const response = await fetch('/predict', {
-            method: 'POST',
+        // Assurez-vous que le port est 5000 (Flask) et non 5501 (Live Server)
+        const response = await fetch("http://127.0.0.1:5000/predict", {
+            method: "POST",
             body: formData
         });
-        
-        if (!response.ok) {
-            throw new Error('Prediction failed');
-        }
-        
-        const result = await response.json();
-        displayPrediction(result);
-        
+
+        if (!response.ok) throw new Error("Erreur serveur");
+
+        const data = await response.json();
+        displayPrediction(data);
+
     } catch (error) {
-        console.error('Error:', error);
-        
-        // For demo purposes, show simulated results
-        // Remove this in production
-        simulatePrediction();
+        console.error(error);
+        alert("Impossible de contacter le serveur backend. Vérifiez qu'il est bien lancé sur le port 5000.");
+        elements.loadingSection.classList.remove('active');
+        elements.submitSection.classList.add('active');
     }
 }
 
