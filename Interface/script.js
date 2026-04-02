@@ -38,11 +38,18 @@ const elements = {
     
     // Prediction
     predictionSection: document.getElementById('predictionSection'),
-    predictedCommand: document.getElementById('predictedCommand'),
-    confidenceFill: document.getElementById('confidenceFill'),
-    confidenceValue: document.getElementById('confidenceValue'),
+    // Modèle 1 (CNN)
+    predictedCommand1: document.getElementById('predictedCommand1'),
+    confidenceFill1: document.getElementById('confidenceFill1'),
+    confidenceValue1: document.getElementById('confidenceValue1'),
+    // Modèle 2 (LSTM)
+    predictedCommand2: document.getElementById('predictedCommand2'),
+    confidenceFill2: document.getElementById('confidenceFill2'),
+    confidenceValue2: document.getElementById('confidenceValue2'),
     otherTags: document.getElementById('otherTags'),
-    
+    otherTags1: document.getElementById('otherTags1'),
+    otherTags2: document.getElementById('otherTags2'),
+
     // Waveform
     waveform: document.getElementById('waveform'),
     waveformOverlay: document.getElementById('waveformOverlay')
@@ -201,15 +208,15 @@ function setupEventListeners() {
     // Recording
     elements.recordBtn.addEventListener('click', toggleRecording);
     
-    // Audio player
-    elements.playPauseBtn.addEventListener('click', togglePlayPause);
+    // Audio player - On utilise l'input range pour le seek
     elements.progressBar.addEventListener('input', seekAudio);
-    audioElement?.addEventListener('timeupdate', updateProgress);
-    audioElement?.addEventListener('loadedmetadata', updateDuration);
-    audioElement?.addEventListener('ended', handleAudioEnded);
+    elements.playPauseBtn.addEventListener('click', togglePlayPause);
     
-    // Submit
-    elements.submitBtn.addEventListener('click', submitAudio);
+    // Submit - ON FORCE LE PREVENT DEFAULT ICI
+    elements.submitBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        submitAudio(e);
+    });
 }
 
 // ============================================
@@ -453,37 +460,47 @@ function formatTime(seconds) {
 // ============================================
 // Submit & API Integration
 // ============================================
-async function submitAudio() {
-    if (!audioFile) {
-        alert('Please upload or record audio first');
-        return;
+async function submitAudio(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
     }
 
-    elements.submitSection.classList.remove('active');
-    elements.loadingSection.classList.add('active');
+    if (!audioFile) {
+        alert('Please upload or record audio first');
+        return false;
+    }
 
-    const formData = new FormData();
-    // L'identifiant "audio" doit correspondre à request.files["audio"] côté Python
-    formData.append("audio", audioFile, "recording.wav"); 
+    console.log("Envoi du fichier audio:", audioFile);
 
     try {
-        // Assurez-vous que le port est 5000 (Flask) et non 5501 (Live Server)
+        if (elements.submitSection) elements.submitSection.classList.remove('active');
+        if (elements.loadingSection) elements.loadingSection.classList.add('active');
+
+        const formData = new FormData();
+        formData.append("audio", audioFile, "recording.wav");
+
         const response = await fetch("http://127.0.0.1:5000/predict", {
             method: "POST",
             body: formData
         });
 
-        if (!response.ok) throw new Error("Erreur serveur");
+        if (!response.ok) throw new Error("Erreur serveur : " + response.status);
 
         const data = await response.json();
-        displayPrediction(data);
+        console.log("Données reçues du serveur:", data);
+
+        displayPredictions(data);
 
     } catch (error) {
-        console.error(error);
-        alert("Impossible de contacter le serveur backend. Vérifiez qu'il est bien lancé sur le port 5000.");
-        elements.loadingSection.classList.remove('active');
-        elements.submitSection.classList.add('active');
+        console.error("Erreur détectée :", error);
+        alert("Erreur lors de la prédiction : " + error.message);
+
+        if (elements.loadingSection) elements.loadingSection.classList.remove('active');
+        if (elements.submitSection) elements.submitSection.classList.add('active');
     }
+
+    return false;
 }
 
 // Simulate prediction for demo
@@ -508,37 +525,61 @@ function simulatePrediction() {
     }, 2000);
 }
 
-function displayPrediction(result) {
-    // Hide loading
-    elements.loadingSection.classList.remove('active');
-    
-    // Display result
-    elements.predictionSection.classList.add('active');
-    
-    // Animate command text
-    elements.predictedCommand.innerHTML = `<span class="result">${result.predicted_command}</span>`;
-    
-    // Animate confidence
-    const confidencePercent = Math.round(result.confidence * 100);
-    setTimeout(() => {
-        elements.confidenceFill.style.width = `${confidencePercent}%`;
-        elements.confidenceValue.textContent = `${confidencePercent}%`;
-    }, 100);
-    
-    // Display other predictions
-    if (result.other_predictions && result.other_predictions.length > 0) {
-        elements.otherTags.innerHTML = result.other_predictions
-            .map(p => `<span class="other-tag">${p.command} (${Math.round(p.confidence * 100)}%)</span>`)
-            .join('');
+function displayPredictions(data) {
+    try {
+        // --- MODÈLE 1 (CNN) ---
+        if (elements.predictedCommand1 && data.cnn) {
+            // Correction : utiliser predicted_command au lieu de command
+            elements.predictedCommand1.textContent = data.cnn.predicted_command;
+            const conf1 = Math.round(data.cnn.confidence * 100);
+            elements.confidenceFill1.style.width = conf1 + "%";
+            elements.confidenceValue1.textContent = conf1 + "%";
+            
+            // Correction : utiliser other_predictions au lieu de others
+            const others1 = data.cnn.other_predictions || [];
+            elements.otherTags1.innerHTML = others1
+                .map(p => `<li>${p.command} <span class="tag-conf">${Math.round(p.confidence * 100)}%</span></li>`)
+                .join('');
+        }
+
+        // --- MODÈLE 2 (LSTM) ---
+        if (elements.predictedCommand2 && data.lstm) {
+            // Correction : utiliser predicted_command au lieu de command
+            elements.predictedCommand2.textContent = data.lstm.predicted_command; 
+            const conf2 = Math.round(data.lstm.confidence * 100);
+            elements.confidenceFill2.style.width = conf2 + "%";
+            elements.confidenceValue2.textContent = conf2 + "%";
+
+            // Correction : utiliser other_predictions au lieu de others
+            const others2 = data.lstm.other_predictions || [];
+            elements.otherTags2.innerHTML = others2
+                .map(p => `<li>${p.command} <span class="tag-conf">${Math.round(p.confidence * 100)}%</span></li>`)
+                .join('');
+        }
+
+        if (elements.loadingSection) elements.loadingSection.classList.remove('active');
+        if (elements.predictionSection) elements.predictionSection.classList.add('active');
+
+    } catch (error) {
+        console.error("Erreur UI :", error);
     }
 }
-
 function hidePrediction() {
     elements.predictionSection.classList.remove('active');
-    elements.predictedCommand.innerHTML = '<span class="placeholder">Waiting for input...</span>';
-    elements.confidenceFill.style.width = '0%';
-    elements.confidenceValue.textContent = '0%';
-    elements.otherTags.innerHTML = '';
+
+    // Reset Model 1
+    if (elements.predictedCommand1) {
+        elements.predictedCommand1.innerHTML = '<span class="placeholder">Waiting for input...</span>';
+        elements.confidenceFill1.style.width = '0%';
+        elements.confidenceValue1.textContent = '0%';
+    }
+
+    // Reset Model 2
+    if (elements.predictedCommand2) {
+        elements.predictedCommand2.innerHTML = '<span class="placeholder">Waiting for input...</span>';
+        elements.confidenceFill2.style.width = '0%';
+        elements.confidenceValue2.textContent = '0%';
+    }
 }
 
 // ============================================

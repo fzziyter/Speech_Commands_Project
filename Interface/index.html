@@ -116,7 +116,7 @@
 
             <!-- Submit Button -->
             <div class="submit-section" id="submitSection">
-                <button class="submit-btn" id="submitBtn">
+                <button type="button" class="submit-btn" id="submitBtn">
                     <i class="fas fa-brain"></i>
                     <span>Analyze Audio</span>
                 </button>
@@ -137,34 +137,42 @@
 
             <!-- Prediction Result -->
             <div class="prediction-section" id="predictionSection">
-                <div class="prediction-card">
-                    <div class="prediction-header">
-                        <div class="prediction-icon">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <h2>Prediction Result</h2>
-                    </div>
-                    <div class="prediction-content">
-                        <div class="command-label">Recognized Command:</div>
-                        <div class="command-text" id="predictedCommand">
-                            <span class="placeholder">Waiting for input...</span>
-                        </div>
-                        <div class="confidence-bar-container">
-                            <span class="confidence-label">Confidence:</span>
-                            <div class="confidence-bar">
-                                <div class="confidence-fill" id="confidenceFill"></div>
-                            </div>
-                            <span class="confidence-value" id="confidenceValue">0%</span>
-                        </div>
-                    </div>
-                    <div class="prediction-footer">
-                        <div class="other-predictions" id="otherPredictions">
-                            <span class="other-label">Other possibilities:</span>
-                            <div class="other-tags" id="otherTags"></div>
-                        </div>
-                    </div>
-                </div>
+    <div class="prediction-card" id="model1Result">
+        <div class="model-badge">CNN</div>
+        <h2>Primary Prediction</h2>
+        <div class="command-text" id="predictedCommand1">
+            <span class="placeholder">Waiting for input...</span>
+        </div>
+        <div class="confidence-bar-container">
+            <div class="confidence-bar">
+                <div class="confidence-fill" id="confidenceFill1"></div>
             </div>
+            <span class="confidence-value" id="confidenceValue1">0%</span>
+        </div>
+        <div class="others-container">
+            <h4>Alternative matches:</h4>
+            <ul class="other-tags" id="otherTags1"></ul>
+        </div>
+    </div>
+
+    <div class="prediction-card" id="model2Result">
+        <div class="model-badge">LSTM</div>
+        <h2>Primary Prediction</h2>
+        <div class="command-text" id="predictedCommand2">
+            <span class="placeholder">Waiting for input...</span>
+        </div>
+        <div class="confidence-bar-container">
+            <div class="confidence-bar">
+                <div class="confidence-fill" id="confidenceFill2"></div>
+            </div>
+            <span class="confidence-value" id="confidenceValue2">0%</span>
+        </div>
+        <div class="others-container">
+            <h4>Alternative matches:</h4>
+            <ul class="other-tags" id="otherTags2"></ul>
+        </div>
+    </div>
+</div>
         </main>
 
         <!-- Footer -->
